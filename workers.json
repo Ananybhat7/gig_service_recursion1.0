@@ -1,0 +1,67 @@
+[
+  {
+    "id": "W001",
+    "name": "Rajesh Kumar",
+    "skills": [
+      "plumbing"
+    ],
+    "verified": true,
+    "available": true,
+    "rating": 4.9,
+    "jobs_this_week": 8,
+    "latitude": 12.975,
+    "longitude": 77.59
+  },
+  {
+    "id": "W002",
+    "name": "Suresh Kumar",
+    "skills": [
+      "plumbing"
+    ],
+    "verified": true,
+    "available": true,
+    "rating": 4.6,
+    "jobs_this_week": 1,
+    "latitude": 12.9755,
+    "longitude": 77.595
+  },
+  {
+    "id": "W003",
+    "name": "Imran Khan",
+    "skills": [
+      "plumbing"
+    ],
+    "verified": true,
+    "available": true,
+    "rating": 4.7,
+    "jobs_this_week": 4,
+    "latitude": 12.98,
+    "longitude": 77.6
+  },
+  {
+    "id": "W004",
+    "name": "Anita Sharma",
+    "skills": [
+      "electrical"
+    ],
+    "verified": true,
+    "available": true,
+    "rating": 4.9,
+    "jobs_this_week": 2,
+    "latitude": 12.97,
+    "longitude": 77.592
+  },
+  {
+    "id": "W005",
+    "name": "Ravi Kumar",
+    "skills": [
+      "plumbing"
+    ],
+    "verified": true,
+    "available": false,
+    "rating": 5.0,
+    "jobs_this_week": 3,
+    "latitude": 12.972,
+    "longitude": 77.593
+  }
+]
