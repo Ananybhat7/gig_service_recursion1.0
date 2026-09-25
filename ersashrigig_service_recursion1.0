@@ -1,0 +1,114 @@
+import json
+
+from distance import calculate_distance, distance_score
+from quality import quality_score
+from fairness import fairness_score
+from scoring import final_score
+from matcher import rank_workers, get_recommendation
+from explaination import generate_explanation
+
+
+with open("workers.json", "r") as file:
+    workers = json.load(file)
+
+with open("job.json", "r") as file:
+    job = json.load(file)
+
+required_service = job["service"]
+
+eligible_workers = []
+
+for worker in workers:
+
+    # Worker must be verified
+    if not worker["verified"]:
+        continue
+
+    # Worker must be available
+    if not worker["available"]:
+        continue
+
+    # Worker must have the required skill
+    if required_service not in worker["skills"]:
+        continue
+
+    eligible_workers.append(worker)
+
+for worker in eligible_workers:
+
+    # Calculate distance
+    distance = calculate_distance(
+        job["latitude"],
+        job["longitude"],
+        worker["latitude"],
+        worker["longitude"]
+    )
+
+    # Convert distance to score
+    distance_sc = distance_score(distance)
+
+    # Convert rating to quality score
+    quality = quality_score(worker["rating"])
+
+    # Calculate fairness score
+    fairness = fairness_score(
+        worker["jobs_this_week"]
+    )
+
+    # Calculate final score
+    final = final_score(
+        distance_sc,
+        quality,
+        fairness
+    )
+
+    # Store scores inside worker data
+    worker["distance"] = distance
+    worker["distance_score"] = distance_sc
+    worker["quality_score"] = quality
+    worker["fairness_score"] = fairness
+    worker["final_score"] = final
+
+ranked_workers = rank_workers(eligible_workers)
+recommended_worker = get_recommendation(ranked_workers)
+
+for worker in ranked_workers:
+    worker["explanation"] = generate_explanation(worker)
+
+print("Customer needs:", required_service)
+
+print("\nRecommended Worker")
+print("------------------")
+
+print(
+    recommended_worker["name"],
+    "| Score:",
+    round(recommended_worker["final_score"], 2)
+)
+
+print("\nWhy this worker?")
+
+for reason in recommended_worker["explanation"]:
+    print("✓", reason)
+
+print("\nWorker Ranking")
+print("----------------")
+
+for position, worker in enumerate(ranked_workers, start=1):
+
+    print(
+        position,
+        "|",
+        worker["name"],
+        "| Distance:",
+        round(worker["distance"], 2),
+        "km",
+        "| Rating:",
+        worker["rating"],
+        "| Jobs:",
+        worker["jobs_this_week"],
+        "| Fairness:",
+        round(worker["fairness_score"], 2),
+        "| Final Score:",
+        round(worker["final_score"], 2)
+    )
