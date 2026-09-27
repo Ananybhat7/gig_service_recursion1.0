@@ -1,0 +1,37 @@
+[
+  {
+    "id": "J001",
+    "service": "plumbing",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "urgency": "emergency"
+  },
+  {
+    "id": "J002",
+    "service": "plumbing",
+    "latitude": 12.9730,
+    "longitude": 77.5960,
+    "urgency": "normal"
+  },
+  {
+    "id": "J003",
+    "service": "plumbing",
+    "latitude": 12.9690,
+    "longitude": 77.5920,
+    "urgency": "normal"
+  },
+  {
+    "id": "J004",
+    "service": "electrical",
+    "latitude": 12.9720,
+    "longitude": 77.5950,
+    "urgency": "normal"
+  },
+  {
+    "id": "J005",
+    "service": "plumbing",
+    "latitude": 12.9740,
+    "longitude": 77.5910,
+    "urgency": "emergency"
+  }
+]
