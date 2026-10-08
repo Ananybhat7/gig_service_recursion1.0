@@ -1,0 +1,145 @@
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('customer', 'worker', 'admin')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE workers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE,
+    phone TEXT,
+    location TEXT,
+    availability BOOLEAN NOT NULL DEFAULT FALSE,
+    rating NUMERIC(3,2) DEFAULT 0.00,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT workers_user_id_fkey
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT workers_rating_check
+        CHECK (rating >= 0 AND rating <= 5)
+);
+
+CREATE TABLE worker_skills (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    worker_id UUID NOT NULL,
+    skill_name TEXT NOT NULL,
+    skill_level TEXT DEFAULT 'beginner'
+        CHECK (skill_level IN (
+            'beginner',
+            'intermediate',
+            'advanced',
+            'expert'
+        )),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT worker_skills_worker_fkey
+        FOREIGN KEY (worker_id)
+        REFERENCES workers(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_worker_skill
+        UNIQUE (worker_id, skill_name)
+);
+
+CREATE TABLE passports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    worker_id UUID NOT NULL UNIQUE,
+    passport_number TEXT NOT NULL UNIQUE,
+    document_url TEXT,
+    verification_status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (verification_status IN (
+            'pending',
+            'verified',
+            'rejected'
+        )),
+    verified_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT passports_worker_id_fkey
+        FOREIGN KEY (worker_id)
+        REFERENCES workers(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE bookings (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_id UUID NOT NULL,
+    worker_id UUID NOT NULL,
+    job_title TEXT NOT NULL,
+    job_description TEXT,
+    booking_status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (booking_status IN (
+            'pending',
+            'accepted',
+            'rejected',
+            'in_progress',
+            'completed',
+            'cancelled'
+        )),
+    scheduled_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT bookings_customer_fkey
+        FOREIGN KEY (customer_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT bookings_worker_fkey
+        FOREIGN KEY (worker_id)
+        REFERENCES workers(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE audits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    action TEXT NOT NULL,
+    entity_type TEXT,
+    entity_id UUID,
+    details JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT audits_user_fkey
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+);
+
+CREATE INDEX idx_workers_user_id
+ON workers(user_id);
+
+CREATE INDEX idx_worker_skills_worker_id
+ON worker_skills(worker_id);
+
+CREATE INDEX idx_bookings_customer_id
+ON bookings(customer_id);
+
+CREATE INDEX idx_bookings_worker_id
+ON bookings(worker_id);
+
+CREATE INDEX idx_bookings_status
+ON bookings(booking_status);
+
+CREATE INDEX idx_audits_user_id
+ON audits(user_id);
+
+CREATE INDEX idx_audits_entity
+ON audits(entity_type, entity_id);
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE worker_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE passports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audits ENABLE ROW LEVEL SECURITY;
